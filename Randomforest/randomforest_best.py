@@ -220,8 +220,8 @@ def process_files(all_files):
 
 
 # Load all CSV files
-train_data_dir = 'train'
-test_data_dir = 'test'
+train_data_dir = 'data/train'
+test_data_dir = 'data/test'
 train_files = [os.path.join(train_data_dir, f) for f in os.listdir(train_data_dir) if f.endswith('.csv')]
 test_files = [os.path.join(test_data_dir, f) for f in os.listdir(test_data_dir) if f.endswith('.csv')]
 
@@ -303,7 +303,7 @@ for feature in velocity_features + angle_features:
         print(f"{feature}: Not found in feature list")
 
 # Save model
-joblib.dump(model, 'randomforest_best_model.pkl')
+# joblib.dump(model, 'randomforest_best_model.pkl')
 
 
 # Classification Report auswerten

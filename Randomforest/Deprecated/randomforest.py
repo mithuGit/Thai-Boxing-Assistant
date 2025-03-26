@@ -51,8 +51,8 @@ def process_files(all_files):
 
 
 # Load all CSV files
-train_data_dir = 'train'
-test_data_dir = 'test'
+train_data_dir = 'data/train'
+test_data_dir = 'data/test'
 train_files = [os.path.join(train_data_dir, f) for f in os.listdir(train_data_dir) if f.endswith('.csv')]
 test_files = [os.path.join(test_data_dir, f) for f in os.listdir(test_data_dir) if f.endswith('.csv')]
 
@@ -113,4 +113,4 @@ for i in range(15):
 
 
 # Save model
-joblib.dump(model, 'boxing_technique_classifier_testpkl')
+joblib.dump(model, 'boxing_technique_classifier_only_keypoints.pkl')

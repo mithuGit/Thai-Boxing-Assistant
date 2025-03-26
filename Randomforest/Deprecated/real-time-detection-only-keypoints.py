@@ -6,7 +6,7 @@ import numpy as np
 from collections import deque
 
 # Configuration
-MODEL_PATH = 'boxing_technique_classifier_angle_with_velocity.pkl'
+MODEL_PATH = 'boxing_technique_classifier_angle_with_velocity.pkl' 
 HISTORY_SIZE = 10  # Number of frames to consider for smoothing
 
 # Load trained model
