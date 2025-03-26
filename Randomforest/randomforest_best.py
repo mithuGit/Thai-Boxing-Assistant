@@ -303,7 +303,7 @@ for feature in velocity_features + angle_features:
         print(f"{feature}: Not found in feature list")
 
 # Save model
-# joblib.dump(model, 'randomforest_best_model.pkl')
+joblib.dump(model, 'randomforest_best_model.pkl')
 
 
 # Classification Report auswerten

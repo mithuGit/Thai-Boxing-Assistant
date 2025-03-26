@@ -393,8 +393,8 @@ def main():
         "Straight Head Right": "DTW/references/straight_right.csv",
         "Low Kick Left": "DTW/references/lowkick_left.csv",
         "Low Kick Right": "DTW/references/lowkick_right.csv",
-        "Roundhouse Kick Left": "DTW/references/sroundhouse_left.csv",
-        "Roundhouse Kick Right": "DTW/references/sroundhouse_right.csv"
+        "Roundhouse Kick Left": "DTW/references/roundhouse_left.csv",
+        "Roundhouse Kick Right": "DTW/references/roundhouse_right.csv",
         "Side Kick Left": "DTW/references/sidekick_left.csv",
         "Side Kick Right": "DTW/references/sidekick_right.csv",
     }
