@@ -3,7 +3,7 @@ import cv2
 import mediapipe as mp
 import numpy as np
 import csv
-import matplotlib.pyplot as plt
+import matplotlib.pyplot as pltpip 
 from fastdtw import fastdtw
 import pandas as pd
 from scipy.spatial.distance import euclidean
@@ -393,8 +393,8 @@ def main():
         "Straight Head Right": "DTW/references/straight_right.csv",
         "Low Kick Left": "DTW/references/lowkick_left.csv",
         "Low Kick Right": "DTW/references/lowkick_right.csv",
-        "Roundhouse Kick Left": "DTW/references/roundhouse_left.csv",
-        "Roundhouse Kick Right": "DTW/references/roundhouse_right.csv",
+        "Roundhouse Kick Left": "DTW/references/sroundhouse_left.csv",
+        "Roundhouse Kick Right": "DTW/references/sroundhouse_right.csv"
         "Side Kick Left": "DTW/references/sidekick_left.csv",
         "Side Kick Right": "DTW/references/sidekick_right.csv",
     }
@@ -424,38 +424,9 @@ def main():
     unique_punch_types = list(punch_type_counts.keys())
     print("Erkannte Schlagtypen:", unique_punch_types)
 
-    # go through all results min and max frames and check if in the test csv file as the label is != 0
-    # in this segment the count of the label which is not 0 should be greater than 15
-
-    # test_csv = pd.read_csv('train/DONE_right_low_kick_7.csv')
-
-    # count = 0
-    # for start, end, dist, punch_type in results:
-    #     if punch_type is not None and punch_type == "Low Kick Right":
-    #         for i in range(start, end):
-    #             if test_csv['label'][i] != 0:
-    #                 count += 1
-    #         if count > 35:
-    #             print("Punch detected in the segment")
-    #         else:
-    #             print("Punch not detected in the segment")
-
     
     # 6. Ergebnisse in CSV speichern
     save_weighted_results(results)
-    
-    """
-    # 7. Plot der DTW-Distanzen (Histogramm der minimalen Distanzen pro Segment)
-    plt.hist(distances, bins=20)
-    threshold = 50.0
-    #threshold = np.percentile(distances, 20)
-    plt.axvline(threshold, color='r', linestyle='dashed', linewidth=2, label=f'Threshold: {threshold:.2f}')
-    plt.xlabel('DTW Distance')
-    plt.ylabel('Frequency')
-    plt.title('Distance Distribution')
-    plt.legend()
-    plt.show()
-    """
     
     # 5.1 Beispielhafte Visualisierung für einen erkannten Schlag
     if len(results) > 0:
