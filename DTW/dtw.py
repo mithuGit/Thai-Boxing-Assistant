@@ -1,28 +1,27 @@
-# type: ignore
 import cv2
 import mediapipe as mp
 import numpy as np
 import csv
-import matplotlib.pyplot as pltpip 
 from fastdtw import fastdtw
-import pandas as pd
 from scipy.spatial.distance import euclidean
 
+# Video Processing Functions
+
 def get_video_file():
-    """Fragt im Terminal den Pfad zum Video ab."""
-    video_path = input("Bitte den Pfad zum Video eingeben (z.B. video.mp4): ").strip()
+    """Prompt user for video file path through terminal input."""
+    video_path = input("Please enter the path to the video (e.g. video.mp4): ").strip()
     return video_path
 
 def process_video(video_path):
     """
-    Liest das Video frameweise, extrahiert die Pose mit MediaPipe
-    und speichert für jeden Frame einen Feature-Vektor (alle 33 Landmarks mit x,y,z,visibility).
-    Dabei werden x und y relativ zur Hüftposition (Landmark 23 und 24) normalisiert.
+    Process video to extract pose landmarks using MediaPipe.
+    Performs automatic orientation detection and normalization relative to hip position.
+    Returns sequence of feature vectors (33 landmarks with x,y,z,visibility per frame).
     """
     cap = cv2.VideoCapture(video_path)
     mp_pose = mp.solutions.pose
     
-    # --- Automatische Orientierungserkennung ---
+    # Automatic orientation detection
     rotate_video = False
     with mp_pose.Pose(static_image_mode=True, min_detection_confidence=0.5) as pose_detector:
         found_frame = False
@@ -34,24 +33,21 @@ def process_video(video_path):
             results = pose_detector.process(image_rgb)
             if results.pose_landmarks:
                 landmarks = results.pose_landmarks.landmark
-                # Nase ist Landmark 0, Hüfte sind Landmark 23 und 24
                 nose_y = landmarks[0].y
                 hip1_y = landmarks[23].y
                 hip2_y = landmarks[24].y
                 hips_center_y = (hip1_y + hip2_y) / 2.0
-                # In einem korrekt orientierten Bild sollte die Nase über dem Hüftzentrum liegen (kleinere y-Werte)
+                # Detect upside-down orientation
                 if nose_y > hips_center_y:
                     rotate_video = True
-                    print("Video scheint kopfstehend zu sein. Drehe es um 180° vor der Verarbeitung.")
+                    print("Video appears to be upside down. Rotate it 180° before processing.")
                 else:
-                    print("Video-Orientierung ist korrekt.")
+                    print("Video orientation is correct.")
                 found_frame = True
                 break
-        # Setze den Video-Stream zurück an den Anfang
-        cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
-    # --- Ende der Orientierungserkennung ---
+        cap.set(cv2.CAP_PROP_POS_FRAMES, 0) # Reset video stream
     
-    # Starte die eigentliche Verarbeitung
+    # Main processing loop
     pose = mp_pose.Pose(static_image_mode=False, min_detection_confidence=0.5)
     sequence = []
     
@@ -61,7 +57,7 @@ def process_video(video_path):
         if not ret:
             break
         
-        # Wende Rotation an, wenn das Video kopfstehend ist
+        # Apply rotation if needed
         if rotate_video:
             frame = cv2.rotate(frame, cv2.ROTATE_180)
         
@@ -73,62 +69,48 @@ def process_video(video_path):
             features = []
             for lm in landmarks:
                 features.extend([lm.x, lm.y, lm.z, lm.visibility])
-            
-            if len(features) >= 132:
-                hip1 = np.array(features[23*4:23*4+2])
-                hip2 = np.array(features[24*4:24*4+2])
-                center = (hip1 + hip2) / 2.0
-                for i in range(0, len(features), 4):
-                    features[i]   = features[i]   - center[0]
-                    features[i+1] = features[i+1] - center[1] 
-           
-           
             sequence.append(features)
         else:
-            sequence.append([0]*132)
+            sequence.append([0]*132) # Fallback for missing landmarks
         
         frame_index += 1
     
     cap.release()
     sequence = np.array(sequence)
-    print(f"Verarbeitete {len(sequence)} Frames.")
+    print(f"Processed {len(sequence)} Frames.")
     return sequence
+
+# REFERENCE DATA HANDLING
 
 def load_reference_sequence(csv_file, normalize=True):
     """
-    Lädt eine Referenzsequenz (z. B. aus perfect_punch.csv) und normalisiert sie analog zu process_video.
-    Erwartet wird, dass in jeder Zeile (ohne Frame- und Label-Spalte) 132 Werte stehen.
+    Load reference sequence from CSV file.
+    Expected format: 132 values per row (33 landmarks * 4 features).
     """
     sequence = []
-    expected_length = 132  # 33 Landmarks * 4 Werte
+    expected_length = 132
     with open(csv_file, 'r') as file:
         reader = csv.reader(file)
-        header = next(reader)  # Überspringe Header
+        header = next(reader)  # Skip header
         for row in reader:
             if not row:
                 continue
-            features = np.array(list(map(float, row[1:-1]))) #entferne Frames und Label
+            # Extract features (excluding frame number and label)
+            features = np.array(list(map(float, row[1:-1])))
             if len(features) != expected_length:
-                print(f"Übersprungen, da Länge {len(features)} nicht passt.")
+                print(f"Skipped because length {len(features)} does not fit.")
                 continue
-            
-            if normalize:
-                hip1 = features[23*4:23*4+2]
-                hip2 = features[24*4:24*4+2]
-                center = (hip1 + hip2) / 2
-                for i in range(0, len(features), 4):
-                    features[i]   -= center[0]
-                    features[i+1] -= center[1]
-           
             sequence.append(features)
     sequence = np.array(sequence)
-    print(f"Referenzsequenz geladen aus '{csv_file}' mit Shape: {sequence.shape}")
+    print(f"Reference sequence loaded from '{csv_file}' with shape: {sequence.shape}")
     return sequence
+
+# SEQUENCE PROCESSING
 
 def segment_sequence(sequence, window_size=35, step=5):
     """
-    Teilt die Sequenz in Segmente (Fenster) der Länge window_size mit Schrittweite step.
-    Gibt eine Liste von Tupeln (StartFrame, EndFrame, Segment) zurück.
+    Split sequence into overlapping windows.
+    Returns list of tuples (start_frame, end_frame, segment_data).
     """
     segments = []
     num_frames = sequence.shape[0]
@@ -136,75 +118,21 @@ def segment_sequence(sequence, window_size=35, step=5):
         end = start + window_size
         segment = sequence[start:end]
         segments.append((start, end, segment))
-    print(f"Erstellt {len(segments)} Segmente.")
+    print(f"Creates {len(segments)} segments.")
     return segments
 
 def compute_dtw_distance(seq1, seq2):
-    """Berechnet die DTW-Distanz zwischen zwei Sequenzen."""
+    """Calculate Dynamic Time Warping distance between two sequences."""
     distance, path = fastdtw(seq1, seq2, dist=euclidean)
     return distance, path
 
-
-'''
-def detect_punches_multiple(segments, ref_sequences):
-    """
-    Vergleicht jedes Segment mittels DTW mit allen Referenzsequenzen.
-    Für jedes Segment wird der Schlagschlagtyp mit der geringsten DTW-Distanz ermittelt.
-    Anschließend wird anhand des 10. Perzentils der besten Distanzen entschieden, 
-    ob das Segment als Treffer gewertet wird.
-    
-    Rückgabe:
-        - final_results: Liste von erkannten Schlägen als Tupel 
-                         (StartFrame, EndFrame, Distance, Punch Type)
-        - all_best_distances: Liste der minimalen DTW-Distanzen pro Segment.
-    """
-    
-    thresholds = {"Hook body Left": 18, #sliding window problem: overlapping windows, no pause between punches 18
-        "Hook head Left": 20, #sliding window + missing keypoints on left side 20
-        "Hook head Right": 21, #21
-        "Hook body Right": 21, #21
-        "Front Kick Right": 25, #25
-        "Front Kick Left": 37, #37
-        "Straight Head Left": 20, #20
-        "Straight Head Right": 18, #18
-        "Low Kick Left": 24, #24
-        "Low Kick Right": 28, #28
-        "Roundhouse Kick Left": 30, #30
-        "Roundhouse Kick Right": 30, #30
-        "Side Kick Left": 45, #45
-        "Side Kick Right": 40} #40
-    results = []
-    best_distances = []
-    for start, end, segment in segments:
-        best_punch = None
-        best_distance = float('inf')
-        for punch_type, ref_seq in ref_sequences.items():
-            distance, _ = compute_dtw_distance(segment, ref_seq)
-            """
-            if distance < best_distance:
-                best_distance = distance
-                best_punch = punch_type
-                """
-            correct_threshold = thresholds[punch_type]
-            if distance < correct_threshold:
-                best_punch = punch_type
-                best_distance = distance
-                best_distances.append(best_distance)
-                results.append((start, end, best_distance, best_punch))
-    # Schwellwert anhand des 10. Perzentils der minimalen Distanzen bestimmen
-    #threshold = 50.0
-    #threshold = np.percentile(best_distances, 20)
-    #final_results = [r for r in results if r[2] < threshold]
-    final_results = results
-    print("Erkannte Punches (Segmente):", final_results)
-    return final_results, best_distances
-    '''
+# PUNCH DETECTION LOGIC
     
 def detect_punches_multiple(segments, ref_sequences):
     """
-    Vergleicht jedes Segment mittels DTW mit allen Referenzsequenzen.
-    Für jedes Segment wird der Schlagschlagtyp mit der geringsten DTW-Distanz ermittelt.
-    Nur wenn diese Distanz unter dem schlagtypspezifischen Schwellenwert liegt, wird es als Treffer gewertet.
+    Detect punches by comparing segments to multiple reference sequences.
+    Uses type-specific thresholds for minimum DTW distance.
+    Returns detected punches and their distances.
     """
     thresholds = {
         "Hook body Left": 18, #sliding window problem: overlapping windows, no pause between punches 18
@@ -230,7 +158,7 @@ def detect_punches_multiple(segments, ref_sequences):
         min_distance = float('inf')
         best_punch = None
 
-        # Berechne Distanz zu allen Referenzen und finde das Minimum
+        # Find best matching reference sequence
         for punch_type, ref_seq in ref_sequences.items():
             distance, _ = compute_dtw_distance(segment, ref_seq)
             
@@ -238,37 +166,27 @@ def detect_punches_multiple(segments, ref_sequences):
                 min_distance = distance
                 best_punch = punch_type
 
-        # Prüfe, ob die beste Distanz unter dem schlagtypspezifischen Schwellenwert liegt
+        # Check against type-specific threshold
         if best_punch and min_distance < thresholds.get(best_punch, float('inf')):
             results.append((start, end, min_distance, best_punch))
             best_distances.append(min_distance)
 
-    print("Erkannte Punches (Segmente):", results)
+    print("Recognized punches (Segments):", results)
     return results, best_distances
 
-def save_weighted_results(results, filename="weighted_results.csv"):
-    """Speichert die erkannten Ergebnisse in einer CSV-Datei."""
-    with open(filename, "w", newline="") as csvfile:
-        writer = csv.writer(csvfile)
-        writer.writerow(["Start Frame", "End Frame", "Distance", "Punch Type"])
-        writer.writerows(results)
-    print(f"Ergebnisse wurden in '{filename}' gespeichert.")
+# RESULT HANDLING
 
 def annotate_video(video_path, output_path, results, flip_video=False):
     """
-    Liest das Video erneut ein, ermittelt automatisch die Orientierung 
-    und dreht es um 180°, wenn es kopfstehend ist.
-    Schreibt den erkannten Schlagschlagtyp (sowie DTW-Distanz) auf die Frames,
-    die innerhalb der erkannten Schlagintervalle liegen, und speichert 
-    das annotierte Video als output_path.
-    Wenn flip_video True ist, wird zusätzlich horizontal gespiegelt.
+    Annotate video with detection results.
+    Handles automatic orientation correction and optional horizontal flip.
     """
     cap = cv2.VideoCapture(video_path)
     if not cap.isOpened():
-        print("Fehler: Video konnte nicht geöffnet werden.")
+        print("Error: Video could not be opened.")
         return
 
-    # --- Automatische Orientierungserkennung ---
+    # Automatic orientation detection
     rotate_video = False
     mp_pose = mp.solutions.pose
     with mp_pose.Pose(static_image_mode=True, min_detection_confidence=0.5) as pose_detector:
@@ -281,46 +199,44 @@ def annotate_video(video_path, output_path, results, flip_video=False):
             results_pose = pose_detector.process(image_rgb)
             if results_pose.pose_landmarks:
                 landmarks = results_pose.pose_landmarks.landmark
-                # Nase ist Landmark 0, Hüfte sind Landmark 23 und 24
+                # Calculate vertical positions for orientation detection
                 nose_y = landmarks[0].y
                 hip1_y = landmarks[23].y
                 hip2_y = landmarks[24].y
                 hips_center_y = (hip1_y + hip2_y) / 2.0
-                # In einem korrekt orientierten Bild sollte die Nase über dem Hüftzentrum liegen (kleinere y-Werte)
                 if nose_y > hips_center_y:
                     rotate_video = True
-                    print("Video scheint kopfstehend zu sein. Drehe das Ausgabevideo um 180°.")
+                    print("Video appears to be upside down. Rotate the output video 180°.")
                 else:
-                    print("Video-Orientierung scheint korrekt für das Ausgabevideo.")
+                    print("Video orientation seems correct for the output video.")
                 found_frame = True
                 break
-        # Setze den Video-Stream zurück an den Anfang
         cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
-    # --- Ende der Orientierungserkennung ---
 
+    # Video writer setup    
     fps = cap.get(cv2.CAP_PROP_FPS)
     width  = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
     height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
     fourcc = cv2.VideoWriter_fourcc(*'mp4v')
     out = cv2.VideoWriter(output_path, fourcc, fps, (width, height))
     
+    # Frame processing loop
     frame_counter = 0
     while cap.isOpened():
         ret, frame = cap.read()
         if not ret:
             break
 
-        # Wende Rotation an, wenn das Video kopfstehend ist
+        # Apply transformations
         if rotate_video:
             frame = cv2.rotate(frame, cv2.ROTATE_180)
         
         if flip_video:
             frame = cv2.flip(frame, 1)
         
-        # Prüfe, ob der aktuelle Frame in einem erkannten Schlagintervall liegt
+        # Add annotations for detected punches
         for start, end, dist, punch_type in results:
             if start <= frame_counter < end:
-                # Zeichne ein Rechteck und die Textannotation
                 top_left = (50, 50)
                 bottom_right = (width - 50, height - 50)
                 cv2.rectangle(frame, top_left, bottom_right, (0, 0, 255), 3)
@@ -329,7 +245,6 @@ def annotate_video(video_path, output_path, results, flip_video=False):
                             cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 0, 255), 3, cv2.LINE_AA)
                 cv2.putText(frame, f"Time: {elapsed_time:.1f}s", (50, 200),
                             cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
-                # Add frame counter to the video
                 cv2.putText(frame, f"Frame: {frame_counter}", (50, 300),
                             cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2, cv2.LINE_AA)
                 break
@@ -339,49 +254,20 @@ def annotate_video(video_path, output_path, results, flip_video=False):
     
     cap.release()
     out.release()
-    print(f"Annotiertes Video wurde als '{output_path}' gespeichert.")
-
-def plot_dtw_warping(seq1, seq2, path, title="DTW Warping Path"):
-    """Visualisiert zwei Sequenzen und ihren Warping-Pfad mit Matplotlib."""
-    plt.figure(figsize=(10, 6))
-    
-    # Sequenzen plotten
-    plt.plot(seq1, label='Sequenz 1 (Referenz)', linestyle='--', alpha=0.7)
-    plt.plot(seq2, label='Sequenz 2 (Test)', linestyle='--', alpha=0.7)
-    
-    # Warping-Pfad einzeichnen
-    for (i, j) in path:
-        plt.plot([i, j], [seq1[i], seq2[j]], color='gray', alpha=0.2)
-    
-    plt.title(title)
-    plt.xlabel("Frame Index")
-    plt.ylabel("Normalisierter Wert")
-    plt.legend()
-    plt.show()
+    print(f"Annotated video was saved as '{output_path}'.")
 
 def main():
-    # 1. Video-Pfad abfragen
+    # Get video path from user
     video_file = get_video_file()
     if not video_file:
-        print("Kein Video angegeben.")
+        print("No video specified.")
         return
-    print("Ausgewähltes Video:", video_file)
+    print("Selected video:", video_file)
     
-    # 2. Video verarbeiten: Pose-Daten extrahieren
+    # Process video to get pose sequence
     sequence = process_video(video_file)
     
-    # 3. Mehrere Referenzsequenzen laden:
-    # Hier definierst du ein Dictionary, in dem die Schlüssel die Schlagschlagtypen
-    # und die Werte die Pfade zu den entsprechenden CSV-Dateien sind.
-    """
-    ref_csv_files = { #TODO: Pfade zu den Referenzsequenzen anpassen
-        "Straight": "CSV:Schläge/DONE_straight_left_6.csv",
-        "Low_Kick_Left": "CSV:Schläge/Ergebnisse Test Low Kick 9.csv",
-        #"Left Hook": "/Pfad/zur/left_hook.csv",
-        # Füge hier weitere Schlagschlagtypen und Pfade hinzu.
-
-    }
-    """
+    # Load reference sequences
     ref_csv_files = {
         "Hook body Left": "DTW/references/hook_body_left.csv",
         "Hook head Left": "DTW/references/hook_left_head.csv",
@@ -401,89 +287,14 @@ def main():
     ref_sequences = {}
 
     for punch_type, csv_file in ref_csv_files.items():
-        print(f"Lade Referenzsequenz für '{punch_type}' aus '{csv_file}'")
+        print(f"Load reference sequence for '{punch_type}' from '{csv_file}'")
         ref_sequences[punch_type] = load_reference_sequence(csv_file)
     
-    # 4. Segmentierung der Video-Pose-Sequenz
+    # Detect punches in video segments
     segments = segment_sequence(sequence, window_size=35, step=35)
-    
-    # 5. Erkennung von Schlägen via DTW mit mehreren Referenzen
-    
     results, distances = detect_punches_multiple(segments, ref_sequences)
 
-    # get unique punch types from results
-    punch_type_counts = {}
-    for start, end, dist, punch_type in results:
-        if punch_type is not None:
-            punch_type_counts[punch_type] = punch_type_counts.get(punch_type, 0) + 1
-    
-    print("Erkannte Schlagtypen und Anzahl der Erkennungen:")
-    for punch_type, count in punch_type_counts.items():
-        print(f"{punch_type}: {count}x")
-
-    unique_punch_types = list(punch_type_counts.keys())
-    print("Erkannte Schlagtypen:", unique_punch_types)
-
-    
-    # 6. Ergebnisse in CSV speichern
-    save_weighted_results(results)
-    
-    # 5.1 Beispielhafte Visualisierung für einen erkannten Schlag
-    if len(results) > 0:
-        # Nehme das erste erkannte Segment und die passende Referenz
-        start, end, dist, punch_type = results[0]
-        test_segment = sequence[start:end]
-        ref_seq = ref_sequences[punch_type]
-        
-        # Wähle einen bestimmten Landmark (z.B. 27 für linke Hand)
-        lm_idx = 15
-        dim = 0  # x-Koordinate (0=x, 1=y, 2=z)
-        
-        # Extrahiere die Features für diesen Landmark
-        seq1 = [frame[lm_idx*4 + dim] for frame in ref_seq]
-        seq2 = [frame[lm_idx*4 + dim] for frame in test_segment]
-        
-        # Berechne DTW-Pfad
-        distance, path = compute_dtw_distance(ref_seq, test_segment)
-        
-        '''
-        # Einfache Visualisierung
-        plot_dtw_warping(
-            seq1, seq2, path, 
-            title=f"Warping-Pfad für {punch_type} (Landmark {lm_idx}, X-Koordinate)"
-        )
-        
-        
-        # Erweiterte Visualisierung mit Subplots für X, Y, Z
-        fig, axs = plt.subplots(3, 1, figsize=(12, 8))
-        for dim, ax in zip([0, 1, 2], axs):
-            seq1 = [frame[lm_idx*4 + dim] for frame in ref_seq]
-            seq2 = [frame[lm_idx*4 + dim] for frame in test_segment]
-            
-            # Normalisierung der Sequenzen
-            seq1 = (seq1 - np.mean(seq1)) / np.std(seq1)
-            seq2 = (seq2 - np.mean(seq2)) / np.std(seq2)
-            
-            # Plotten auf dem spezifischen Subplot
-            ax.plot(seq1, label='Referenz', linestyle='--', alpha=0.7)
-            ax.plot(seq2, label='Test', linestyle='--', alpha=0.7)
-            
-            # Warping-Pfad einzeichnen
-            for (i, j) in path:
-                ax.plot([i, j], [seq1[i], seq2[j]], color='gray', alpha=0.2)
-            
-            ax.set_title(f"{punch_type} (Landmark {lm_idx}, {'X' if dim==0 else 'Y' if dim==1 else 'Z'}-Koordinate)")
-            ax.set_xlabel("Frame Index")
-            ax.set_ylabel("Normalisierter Wert")
-            ax.legend()
-        
-        plt.tight_layout()
-        plt.savefig(f"dtw_plot_{punch_type}.png", dpi=300)
-        plt.show()
-
-        '''
-    
-    # 8. Annotiere das Video und speichere das Ergebnis
+    # Save and visualize results
     output_video = "annotated_output.mp4"
     annotate_video(video_file, output_video, results)
 
