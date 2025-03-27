@@ -1,4 +1,3 @@
-```markdown
 # DTW-Based Motion Recognition
 
 ## System Overview
@@ -15,7 +14,10 @@
 
 ## Usage Notes
 
-1. After launching the program, you will be prompted to enter the path to a video file. Ensure this path is an absolute path (relative paths may fail)
+1. After launching the program, you will be prompted to enter the path to a video file.
+
+**Important**
+Ensure this path is an absolute path (relative paths may fail)
 
 2. Annotations show:
    - Technique name
@@ -28,4 +30,11 @@ For an example video you can take videos from DTW/test_videos
 
 - Console: Recognized segments with frame ranges
 - Video: Red bounding box + technique name during detection
+
+## Instruction
+
+1. run [text](dtw.py)
+
+```bash
+python3.12 dtw.py
 ```
