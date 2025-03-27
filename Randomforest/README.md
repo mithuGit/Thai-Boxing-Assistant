@@ -32,13 +32,13 @@ CSV files must contain:
 
 ## Instruction
 
-1. run [text](randomforest_best.py) to get the model
+1. run [randomforest_best.py](randomforest_best.py) to get the model
 
 ```bash
 python3.12 randomforest_best.py
 ```
 
-2. run [text](real_time_detection) (camera permission required)
+2. run [real_time_detection.py](real_time_detection.py) (camera permission required)
 
 ```bash
 python3.12 randomforest_best.py
