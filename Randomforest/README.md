@@ -41,5 +41,5 @@ python3.12 randomforest_best.py
 2. run [real_time_detection.py](real_time_detection.py) (camera permission required)
 
 ```bash
-python3.12 randomforest_best.py
+python3.12 real_time_detection.py
 ```
