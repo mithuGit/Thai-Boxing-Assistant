@@ -29,6 +29,10 @@ Using MediaPipe, we extracted 33 body keypoints (x,y,z,visibility) to model move
 - DTW's "one reference sample" approach showed limited adaptability compared to RF's learned patterns
 - Angle velocities and limb speeds emerged as critical features for RF
 
+For annotated example videos, you can visit this link to HesseBox to view and download them: https://next.hessenbox.de/index.php/s/QYmKeE8tKrjPASq
+
+For experiments with object detection, an annotated dataset is available on Roboflow: https://universe.roboflow.com/ai-lab-homm5/thai-boxing-object-detection
+
 ## Installation (Windows/macOS)
 
 Python **3.12** is required due to Mediapipe
