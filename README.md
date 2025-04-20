@@ -35,7 +35,7 @@ git clone https://github.com/mithuGit/Thai-Boxing-Trainer.git
 2. Create virtual environment
 
 ```bash
-python.12 -m venv .venv
+python3.12 -m venv .venv
 ```
 
 3. Activate environment
