@@ -1,7 +1,5 @@
-# type: ignore
 import pandas as pd 
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.model_selection import train_test_split
 import joblib
 import os
 import numpy as np
@@ -113,8 +111,8 @@ def process_files(all_files):
 
 
 # Load all CSV files
-train_data_dir = 'train'
-test_data_dir = 'test'
+train_data_dir = 'data/train'
+test_data_dir = 'data/test'
 train_files = [os.path.join(train_data_dir, f) for f in os.listdir(train_data_dir) if f.endswith('.csv')]
 test_files = [os.path.join(test_data_dir, f) for f in os.listdir(test_data_dir) if f.endswith('.csv')]
 

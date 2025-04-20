@@ -1,4 +1,3 @@
-# type: ignore
 import cv2
 import mediapipe as mp
 import joblib
@@ -365,7 +364,6 @@ while cap.isOpened():
     # Save frame to a video file
     out.write(frame)
     
-
     
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break

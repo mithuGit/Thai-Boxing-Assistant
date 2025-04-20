@@ -1,13 +1,11 @@
-# type: ignore
 import pandas as pd 
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.model_selection import train_test_split
 import joblib
 import os
 import numpy as np
 from sklearn.metrics import classification_report
 from sklearn.tree import plot_tree
-import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt # type: ignore
 
 # Define the label mapping
 label_map = {
