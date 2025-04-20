@@ -78,7 +78,7 @@ def process_files(all_files):
         ]
     
         
-        # Add columns for velocity and angular velocity
+        # Add columns for velocity and angle velocity
         velocities = []
         
         # Track previous values for velocity calculation

@@ -98,10 +98,10 @@ def calculate_velocity(current_point, previous_point, time_delta=1):
     
     return speed
 
-# Function to calculate angular velocity
-def calculate_angular_velocity(current_angle, previous_angle, time_delta=1):
+# Function to calculate angle velocity
+def calculate_angle_velocity(current_angle, previous_angle, time_delta=1):
     """
-    Calculate the angular velocity between frames.
+    Calculate the angle velocity between frames.
     """
     if previous_angle is None:
         return 0.0
@@ -115,10 +115,10 @@ def calculate_angular_velocity(current_angle, previous_angle, time_delta=1):
     elif angle_change < -180:
         angle_change += 360
     
-    # Calculate angular velocity (absolute value for magnitude)
-    angular_velocity = abs(angle_change) / time_delta
+    # Calculate angle velocity (absolute value for magnitude)
+    angle_velocity = abs(angle_change) / time_delta
     
-    return angular_velocity
+    return angle_velocity
 
 # Initialize MediaPipe Pose
 mp_pose = mp.solutions.pose
@@ -293,15 +293,15 @@ while cap.isOpened():
         else:
             angles['right_leg_angle'] = 0
         
-        # Calculate angular velocities
-        angular_velocities = {}
-        angular_velocities['left_arm_angular_velocity'] = calculate_angular_velocity(
+        # Calculate angle velocities
+        angle_velocities = {}
+        angle_velocities['left_arm_angle_velocity'] = calculate_angle_velocity(
             angles['left_arm_angle'], prev_angles['left_arm'])
-        angular_velocities['right_arm_angular_velocity'] = calculate_angular_velocity(
+        angle_velocities['right_arm_angle_velocity'] = calculate_angle_velocity(
             angles['right_arm_angle'], prev_angles['right_arm'])
-        angular_velocities['left_leg_angular_velocity'] = calculate_angular_velocity(
+        angle_velocities['left_leg_angle_velocity'] = calculate_angle_velocity(
             angles['left_leg_angle'], prev_angles['left_leg'])
-        angular_velocities['right_leg_angular_velocity'] = calculate_angular_velocity(
+        angle_velocities['right_leg_angle_velocity'] = calculate_angle_velocity(
             angles['right_leg_angle'], prev_angles['right_leg'])
         
         # Update previous angles
@@ -327,10 +327,10 @@ while cap.isOpened():
             angles['right_arm_angle'], 
             angles['left_leg_angle'], 
             angles['right_leg_angle'],
-            angular_velocities['left_arm_angular_velocity'],
-            angular_velocities['right_arm_angular_velocity'],
-            angular_velocities['left_leg_angular_velocity'],
-            angular_velocities['right_leg_angular_velocity'],
+            angle_velocities['left_arm_angle_velocity'],
+            angle_velocities['right_arm_angle_velocity'],
+            angle_velocities['left_leg_angle_velocity'],
+            angle_velocities['right_leg_angle_velocity'],
             velocities['point_15_velocity'],
             velocities['point_16_velocity'], 
             velocities['point_27_velocity'], 
