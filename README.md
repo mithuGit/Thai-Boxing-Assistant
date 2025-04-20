@@ -1,21 +1,10 @@
-<div style="display: flex; justify-content: space-between; align-items: center;">
-  <div>
+<div align="center">
     <img 
-      src="images/tuda_logo_RGB.svg" 
+      src="images/logo.png" 
       alt="Project Logo" 
-      width="300"
-    >
-  </div>
-
-  <div>
-    <img 
-      src="images/robot_qr.png" 
-      alt="Project Logo" 
-      width="300"
       height="400"
     >
   </div>
-</div>
 
 # Thai-Boxing-Assistant
 
