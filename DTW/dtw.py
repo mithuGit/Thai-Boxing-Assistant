@@ -2,7 +2,7 @@ import cv2
 import mediapipe as mp
 import numpy as np
 import csv
-from fastdtw import fastdtw
+from fastdtw import fastdtw # type: ignore
 from scipy.spatial.distance import euclidean
 
 # Video Processing Functions

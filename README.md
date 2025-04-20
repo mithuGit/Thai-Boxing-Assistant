@@ -1,6 +1,6 @@
 <div align="center">
   <img 
-    src="data/other/tuda_logo_RGB.svg" 
+    src="images/tuda_logo_RGB.svg" 
     alt="Project Logo" 
     width="300"
   >
