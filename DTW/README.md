@@ -33,7 +33,13 @@ For an example video you can take videos from DTW/test_videos
 
 ## Instruction
 
-1. run [dtw.py](dtw.py)
+1. Change into the DTW directory
+
+```bash
+cd DTW/
+```
+
+2. run [dtw.py](dtw.py)
 
 ```bash
 python3.12 dtw.py

@@ -15,7 +15,7 @@ def get_video_file():
 def process_video(video_path):
     """
     Process video to extract pose landmarks using MediaPipe.
-    Performs automatic orientation detection and normalization relative to hip position.
+    Performs automatic orientation detection.
     Returns sequence of feature vectors (33 landmarks with x,y,z,visibility per frame).
     """
     cap = cv2.VideoCapture(video_path)
