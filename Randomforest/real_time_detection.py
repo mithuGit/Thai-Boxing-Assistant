@@ -129,7 +129,7 @@ pose = mp_pose.Pose(
 mp_drawing = mp.solutions.drawing_utils
 
 # Initialize video capture and smoothing buffer
-cap = cv2.VideoCapture("DTW/test_videos/TEST_front_kick_right_7.MOV") # Set to 0 for webcam, Set to 1 for external camera (IPhone)
+cap = cv2.VideoCapture("../DTW/test_videos/TEST_front_kick_right_7.MOV") # Set to 0 for webcam, Set to 1 for external camera (IPhone)
 
 fps = cap.get(cv2.CAP_PROP_FPS)
 width  = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))

@@ -6,7 +6,7 @@ from collections import deque
 import math
 
 # Configuration
-MODEL_PATH = 'boxing_technique_classifier_new_angle_newnew.pkl'
+MODEL_PATH = '' # TODO Please add the path to the trained model
 HISTORY_SIZE = 10  # Number of frames to consider for smoothing
 
 # Load trained model
@@ -83,7 +83,7 @@ pose = mp_pose.Pose(
 mp_drawing = mp.solutions.drawing_utils
 
 # Initialize video capture and smoothing buffer
-cap = cv2.VideoCapture("DTW/test_videos/TEST_front_kick_right_7.MOV")
+cap = cv2.VideoCapture("../../DTW/test_videos/TEST_front_kick_right_7.MOV")
 prediction_history = deque(maxlen=HISTORY_SIZE)
 print(cv2.__version__)
 

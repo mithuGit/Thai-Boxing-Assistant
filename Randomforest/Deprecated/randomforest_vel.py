@@ -111,8 +111,8 @@ def process_files(all_files):
 
 
 # Load all CSV files
-train_data_dir = 'data/train'
-test_data_dir = 'data/test'
+train_data_dir = '../../data/train'
+test_data_dir = '../../data/test'
 train_files = [os.path.join(train_data_dir, f) for f in os.listdir(train_data_dir) if f.endswith('.csv')]
 test_files = [os.path.join(test_data_dir, f) for f in os.listdir(test_data_dir) if f.endswith('.csv')]
 

@@ -269,20 +269,20 @@ def main():
     
     # Load reference sequences
     ref_csv_files = {
-        "Hook body Left": "DTW/references/hook_body_left.csv",
-        "Hook head Left": "DTW/references/hook_left_head.csv",
-        "Hook head Right": "DTW/references/hook_head_right.csv",
-        "Hook body Right": "DTW/references/hook_body_right.csv",
-        "Front Kick Right": "DTW/references/frontkick_right.csv",
-        "Front Kick Left": "DTW/references/frontkick_left.csv",
-        "Straight Head Left": "DTW/references/straight_left.csv",
-        "Straight Head Right": "DTW/references/straight_right.csv",
-        "Low Kick Left": "DTW/references/lowkick_left.csv",
-        "Low Kick Right": "DTW/references/lowkick_right.csv",
-        "Roundhouse Kick Left": "DTW/references/roundhouse_left.csv",
-        "Roundhouse Kick Right": "DTW/references/roundhouse_right.csv",
-        "Side Kick Left": "DTW/references/sidekick_left.csv",
-        "Side Kick Right": "DTW/references/sidekick_right.csv",
+        "Hook body Left": "references/hook_body_left.csv",
+        "Hook head Left": "references/hook_left_head.csv",
+        "Hook head Right": "references/hook_head_right.csv",
+        "Hook body Right": "references/hook_body_right.csv",
+        "Front Kick Right": "references/frontkick_right.csv",
+        "Front Kick Left": "references/frontkick_left.csv",
+        "Straight Head Left": "references/straight_left.csv",
+        "Straight Head Right": "references/straight_right.csv",
+        "Low Kick Left": "references/lowkick_left.csv",
+        "Low Kick Right": "references/lowkick_right.csv",
+        "Roundhouse Kick Left": "references/roundhouse_left.csv",
+        "Roundhouse Kick Right": "references/roundhouse_right.csv",
+        "Side Kick Left": "references/sidekick_left.csv",
+        "Side Kick Right": "references/sidekick_right.csv",
     }
     ref_sequences = {}
 
