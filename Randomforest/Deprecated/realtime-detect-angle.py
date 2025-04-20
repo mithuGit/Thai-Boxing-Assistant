@@ -83,7 +83,7 @@ pose = mp_pose.Pose(
 mp_drawing = mp.solutions.drawing_utils
 
 # Initialize video capture and smoothing buffer
-cap = cv2.VideoCapture("KeyPose_Mediapipe/Ebens winkel/TEST_left_low_kick_6.MOV")
+cap = cv2.VideoCapture("DTW/test_videos/TEST_front_kick_right_7.MOV")
 prediction_history = deque(maxlen=HISTORY_SIZE)
 print(cv2.__version__)
 

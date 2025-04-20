@@ -4,7 +4,6 @@ import joblib
 import os
 import numpy as np
 from sklearn.metrics import classification_report
-from sklearn.tree import plot_tree
 import matplotlib.pyplot as plt # type: ignore
 
 # Define the label mapping

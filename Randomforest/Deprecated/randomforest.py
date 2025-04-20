@@ -109,7 +109,5 @@ for i in range(15):
     idx = sorted_idx[i]
     print(f"{feature_names[idx]}: {feature_importance[idx]:.4f}")
 
-
-
 # Save model
 joblib.dump(model, 'boxing_technique_classifier_only_keypoints.pkl')

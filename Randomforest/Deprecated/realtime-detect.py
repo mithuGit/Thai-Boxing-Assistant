@@ -45,7 +45,7 @@ pose = mp_pose.Pose(
 mp_drawing = mp.solutions.drawing_utils  # Hinzugefügt für das Zeichnen der Keypoints
 
 # Initialize video capture and smoothing buffer
-cap = cv2.VideoCapture("KeyPose_Mediapipe/Ebens winkel/TEST_straight_right_6.MOV")
+cap = cv2.VideoCapture("DTW/test_videos/TEST_front_kick_right_7.MOV")
 print(cv2.__version__)
 prediction_history = deque(maxlen=HISTORY_SIZE)
 
