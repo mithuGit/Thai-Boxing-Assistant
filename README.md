@@ -15,6 +15,13 @@ We explored two approaches to recognize diverse strikes/kicks:
 
 Using MediaPipe, we extracted 33 body keypoints (x,y,z,visibility) to model movements through both temporal alignment and statistical learning.
 
+<div align="center">
+  <img 
+    src="images/techniques.png" 
+    alt="Project Logo" 
+  >
+</div>
+
 ## Key Findings
 
 - **RF outperformed DTW**
@@ -55,7 +62,28 @@ pip install -r requirements.txt
 
 5. Run program (please refer to the specific README for DTW or Random Forest for usage guidelines)
 
+
+6. If this error occurs:
+```bash
+from mediapipe.python._framework_bindings import model_ckpt_util
+ImportError: DLL load failed while importing _framework_bindings: Eine DLL-Initialisierungsroutine ist 
+```
+Please install this dependency:
+```bash
+pip install msvc-runtime   
+```
+
 Developed by: **Mithusan Naguleswaran**, **Nils Kovacic**, **Maximilian Laue**, **Tim Duc Minh**, **Ebenhaezer Aubrey Sopacua**
 
 Special Thanks to our supervisor **Quentin Delfosse** and our external expert **Vincent Scharf** for their valuable insights and support in developing our ideas.
 Also thanks to the members of the **Kickboxing Club** at TU Darmstadt, who volunteered to be filmed for our dataset.
+
+
+<div align="center">
+  <img 
+    src="images/robot_qr.png" 
+    alt="Project Logo" 
+    width="300"
+    height="400"
+  >
+</div>
